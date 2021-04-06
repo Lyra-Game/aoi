@@ -1,4 +1,4 @@
-.PHONY: all test clean debug
+.PHONY: all test clean debug grid
 all: grid
 
 CFLAGS= -g3 -std=c99 -O2 -rdynamic -Wall -fPIC -shared -Wno-missing-braces

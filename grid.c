@@ -57,8 +57,8 @@ void grid_create(Grid* grid, float cell_w, float cell_h, float l, float t, float
     grid->inv_cell_h = 1.0f / cell_w;
     grid->x = l;
     grid->y = t;
-    grid->h = w;
-    grid->w = h;
+    grid->w = w;
+    grid->h = h;
 
     grid->rows = (GridRow *)malloc(num_rows * sizeof(GridRow));
     for (int r = 0; r < num_rows; ++r) {

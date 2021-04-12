@@ -144,12 +144,9 @@ void grid_move(Grid* grid, int handle, float px, float py, float x, float y) {
             nfl_remove(prev_row->nfl, node_idx);
             DBGprint("move node(handle:%d,x:%f,y:%f) -> (x:%f,y:%f) old cell(%d,%d) del, new cell(%d,%d) add\n",
                     node->handle, node->x, node->y, x, y, prev_cell_x, prev_cell_y, next_cell_x, next_cell_y);
-            node->x = x;
-            node->y = y;
 
-            node->next = next_row->cells[next_cell_x];
-            next_row->cells[next_cell_x] = nfl_insert(next_row->nfl, node->handle,
-                    node->x, node->y, node->next);
+            next_row->cells[next_cell_x] = nfl_insert(next_row->nfl, handle,
+                    x, y, next_row->cells[next_cell_x]);
         }
     }
 }

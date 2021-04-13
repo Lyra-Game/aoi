@@ -75,6 +75,20 @@ gd_query(lua_State *L) {
 }
 
 static int
+gd_query_cell(lua_State *L) {
+    Grid *grid = luaL_checkudata(L, 1, MT_NAME);
+    float x = luaL_checknumber(L, 2);
+    float y = luaL_checknumber(L, 3);
+    grid_query_cell(grid, &out_put, x, y);
+    lua_newtable(L);
+    for (int i = 0; i < il_size(&out_put); i++) {
+        lua_pushinteger(L, il_get(&out_put, i, 0));
+        lua_rawseti(L, -2, i + 1);
+    }
+    return 1;
+}
+
+static int
 gd_in_bound(lua_State *L) {
     Grid *grid = luaL_checkudata(L, 1, MT_NAME);
     float x = luaL_checknumber(L, 2);
@@ -105,6 +119,7 @@ lmetatable(lua_State *L) {
             { "remove", gd_remove },
             { "move", gd_move },
             { "query", gd_query },
+            { "query_cell", gd_query_cell },
             { "in_bound", gd_in_bound },
             { "optimize", gd_optimize },
             { NULL, NULL }

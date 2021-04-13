@@ -65,6 +65,8 @@ GRID_FUNC void grid_move(Grid* grid, int handle, float px, float py, float x, fl
 // x,y 为视野中心，w,h 为宽高
 GRID_FUNC void grid_query(const Grid* grid, IntList* out, float x, float y, float w, float h);
 
+GRID_FUNC void grid_query_cell(const Grid* grid, IntList* out, float x, float y);
+
 // 返回位置是否在地图范围里
 GRID_FUNC int grid_in_bound(const Grid* grid, float x, float y);
 

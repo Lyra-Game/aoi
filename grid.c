@@ -180,6 +180,19 @@ void grid_query(const Grid* grid, IntList* out, float x, float y, float w, float
     }
 }
 
+void grid_query_cell(const Grid* grid, IntList* out, float x, float y) {
+    const int cell_x = grid_cell_x(grid, x);
+    const int cell_y = grid_cell_y(grid, y);
+    il_clear(out);
+    const GridRow* row = &grid->rows[cell_y];
+    int node_idx = row->cells[cell_x];
+    while (node_idx != -1) {
+        const Node* node = nfl_get(row->nfl, node_idx);
+        il_set(out, il_push_back(out), 0, node->handle);
+        node_idx = node->next;
+    }
+}
+
 int grid_in_bound(const Grid* grid, float x, float y) {
     x -= grid->x;
     y -= grid->y;

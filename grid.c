@@ -75,6 +75,7 @@ void grid_create(Grid* grid, float cell_w, float cell_h, float l, float t, float
 void grid_destroy(Grid* grid) {
     for (int r = 0; r < grid->num_rows; ++r) {
         nfl_destroy(grid->rows[r].nfl);
+        free(grid->rows[r].nfl);
         free(grid->rows[r].cells);
     }
     free(grid->rows);
@@ -223,6 +224,7 @@ void grid_optimize(Grid* grid) {
             }
         }
         nfl_destroy(row->nfl);
+        free(row->nfl);
         row->nfl = new_nfl;
     }
 }

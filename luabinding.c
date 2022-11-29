@@ -12,7 +12,7 @@ extern "C" {
 #define LUA_LIB_API extern
 #endif
 
-static IntList out_put;
+static IntList *out_put;
 
 #define MT_NAME ("_grid_metatable")
 
@@ -65,10 +65,10 @@ gd_query(lua_State *L) {
     float y = luaL_checknumber(L, 3);
     float w = luaL_checknumber(L, 4);
     float h = luaL_checknumber(L, 5);
-    grid_query(grid, &out_put, x, y, w, h);
+    grid_query(grid, out_put, x, y, w, h);
     lua_newtable(L);
-    for (int i = 0; i < il_size(&out_put); i++) {
-        lua_pushinteger(L, il_get(&out_put, i, 0));
+    for (int i = 0; i < il_size(out_put); i++) {
+        lua_pushinteger(L, il_get(out_put, i, 0));
         lua_rawseti(L, -2, i + 1);
     }
     return 1;
@@ -79,10 +79,10 @@ gd_query_cell(lua_State *L) {
     Grid *grid = luaL_checkudata(L, 1, MT_NAME);
     float x = luaL_checknumber(L, 2);
     float y = luaL_checknumber(L, 3);
-    grid_query_cell(grid, &out_put, x, y);
+    grid_query_cell(grid, out_put, x, y);
     lua_newtable(L);
-    for (int i = 0; i < il_size(&out_put); i++) {
-        lua_pushinteger(L, il_get(&out_put, i, 0));
+    for (int i = 0; i < il_size(out_put); i++) {
+        lua_pushinteger(L, il_get(out_put, i, 0));
         lua_rawseti(L, -2, i + 1);
     }
     return 1;
@@ -157,7 +157,7 @@ lnew(lua_State *L) {
 
 LUA_LIB_API int
 luaopen_grid(lua_State* L) {
-    il_create(&out_put, 1);
+    out_put = il_create(1);
     luaL_checkversion(L);
     luaL_Reg l[] = {
         { "new", lnew },

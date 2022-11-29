@@ -207,21 +207,21 @@ void grid_optimize(Grid* grid) {
         nfl_reserve(new_nfl, row->num_nodes);
         for (int c = 0; c < grid->num_cols; ++c) {
             // 替换旧 freelist 指针
-            IntList new_node_idxs;
-            il_create(&new_node_idxs, 1);
+            IntList *new_node_idxs = il_create(1);
             int* link = &row->cells[c];
             while (*link != -1) {
                 const Node* node = nfl_get(row->nfl, *link);
-                il_set(&new_node_idxs, il_push_back(&new_node_idxs), 0,
+                il_set(new_node_idxs, il_push_back(new_node_idxs), 0,
                         nfl_insert(new_nfl, node->handle, node->x, node->y, node->next));
                 *link = node->next;
             }
-            for (int j = 0; j < il_size(&new_node_idxs); ++j) {
-                const int new_node_idx = il_get(&new_node_idxs, j, 0);
+            for (int j = 0; j < il_size(new_node_idxs); ++j) {
+                const int new_node_idx = il_get(new_node_idxs, j, 0);
                 Node* node = nfl_get(new_nfl, new_node_idx);
                 node->next = *link;
                 *link = new_node_idx;
             }
+            il_destroy(new_node_idxs);
         }
         nfl_destroy(row->nfl);
         free(row->nfl);

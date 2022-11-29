@@ -3,19 +3,45 @@
 #include <string.h>
 #include <assert.h>
 
-void il_create(IntList* il, int num_fields) {
+struct int_list {
+    // Stores a fixed-size buffer in advance to avoid requiring
+    // a heap allocation until we run out of space.
+    int fixed[il_fixed_cap];
+
+    // Points to the buffer used by the list. Initially this will
+    // point to 'fixed'.
+    int* data;
+
+    // Stores how many integer fields each element has.
+    int num_fields;
+
+    // Stores the number of elements in the list.
+    int num;
+
+    // Stores the capacity of the array.
+    int cap;
+
+    // Stores an index to the free element or -1 if the free list
+    // is empty.
+    int free_element;
+};
+
+IntList * il_create(int num_fields) {
+    IntList *il = (IntList *)malloc(sizeof(IntList));
     il->data = il->fixed;
     il->num = 0;
     il->cap = il_fixed_cap;
     il->num_fields = num_fields;
     il->free_element = -1;
+    return il;
 }
 
 void il_destroy(IntList* il) {
-    // 如果有堆分配记得释放
+    // Free the buffer only if it was heap allocated.
     if (il->data != il->fixed) {
         free(il->data);
     }
+    free(il);
 }
 
 void il_clear(IntList* il) {
@@ -23,11 +49,11 @@ void il_clear(IntList* il) {
     il->free_element = -1;
 }
 
-int il_size(const IntList* il) {
+int il_size(IntList* il) {
     return il->num;
 }
 
-int il_get(const IntList* il, int n, int field) {
+int il_get(IntList* il, int n, int field) {
     assert(n >= 0 && n < il->num);
     return il->data[n*il->num_fields + field];
 }
@@ -40,46 +66,51 @@ void il_set(IntList* il, int n, int field, int val) {
 int il_push_back(IntList* il) {
     const int new_pos = (il->num+1) * il->num_fields;
 
-    // 如果 list 满了，重新分配 buffer
+    // If the list is full, we need to reallocate the buffer to make room
+    // for the new element.
     if (new_pos > il->cap) {
-        // 空间倍增
+        // Use double the size for the new capacity.
         const int new_cap = new_pos * 2;
 
-        // 如果当前最大长度跟固定长度相等，证明是首次扩容
-        // 需要将固定长度 buffer 内的元素拷贝进新分配的 buffer
+        // If we're pointing to the fixed buffer, allocate a new array on the
+        // heap and copy the fixed buffer contents to it.
         if (il->cap == il_fixed_cap) {
             il->data = malloc(new_cap * sizeof(*il->data));
             memcpy(il->data, il->fixed, sizeof(il->fixed));
         } else {
-            // 否则直接扩大 buffer 的大小
+            // Otherwise reallocate the heap buffer to the new size.
             il->data = realloc(il->data, new_cap * sizeof(*il->data));
         }
+        // Set the old capacity to the new capacity.
         il->cap = new_cap;
     }
     return il->num++;
 }
 
 void il_pop_back(IntList* il) {
+    // Just decrement the list size.
     assert(il->num > 0);
     --il->num;
 }
 
 int il_insert(IntList* il) {
-    // 如果 freelist 里还有空间，直接用
+    // If there's a free index in the free list, pop that and use it.
     if (il->free_element != -1) {
         const int index = il->free_element;
         const int pos = index * il->num_fields;
 
+        // Set the free index to the next free index.
         il->free_element = il->data[pos];
 
+        // Return the free index.
         return index;
     }
-    // 否则就往后插，可能触发重新分配内存
+    // Otherwise insert to the back of the array.
     return il_push_back(il);
 }
 
 void il_erase(IntList* il, int n) {
-    // 移除一个元素会空出一个 freelist 节点
+    // Push the element to the free list.
     const int pos = n * il->num_fields;
     il->data[pos] = il->free_element;
     il->free_element = n;

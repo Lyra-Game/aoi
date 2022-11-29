@@ -7,12 +7,15 @@ grid: grid.so
 grid.so: luabinding.c grid.c node_freelist.c intlist.c
 	gcc $(CFLAGS) -o $@ $^
 
-all: test
 test:
 	lua test.lua
 
 clean:
-	rm -f *.so
+	rm -f *.so testc
 
 debug: CFLAGS += -DDEBUG
-debug: grid test
+debug: grid
+
+testc:
+	gcc -lm -fsanitize=address -ggdb intlist.c grid.c node_freelist.c testc.c -o testc
+
